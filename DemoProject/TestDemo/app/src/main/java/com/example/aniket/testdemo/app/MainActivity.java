@@ -7,8 +7,12 @@ package com.example.aniket.testdemo.app;
  */
 
 import android.app.ProgressDialog;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -38,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private EditText edtSearch;
     private ProgressDialog pDialog;
     private ListView listData;
+    private CustomListAdapter adapter;
 
 
     @Override
@@ -49,10 +54,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     //get the actual views
     private void getViews() {
-        btnSearch = (Button) findViewById(R.id.btnSearch);
+      //  btnSearch = (Button) findViewById(R.id.btnSearch);
         edtSearch = (EditText) findViewById(R.id.edtSearch);
-        btnSearch.setOnClickListener(this);
+      //  btnSearch.setOnClickListener(this);
         listData = (ListView) findViewById(R.id.lv_Data);
+        edtSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.toString().trim().length()>2) {
+                    processRequest(s.toString());
+                }
+                else {
+                    listData.setAdapter(null);
+
+                    if (s.toString().trim().length()==0)
+                    Toast.makeText(MainActivity.this, getResources().getString(R.string.empty_warning_message), Toast.LENGTH_SHORT).show();
+
+                }
+            }
+        });
 
     }
 
@@ -74,12 +104,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             if (pDialog != null) {
                                 pDialog.dismiss();
                             }
-                            String responseQuery = response.getJSONObject("query").toString();
-                            ArrayList<SearchResultModel> data = parseData(response);
-                            CustomListAdapter adapter = new CustomListAdapter(MainActivity.this, data);
-                            listData.setAdapter(adapter);
-
-
+                            if (response!=null) {
+                                if (response.has("query")) {
+                                    String responseQuery = response.getJSONObject("query").toString();
+                                    ArrayList<SearchResultModel> data = parseData(response);
+                                    adapter = new CustomListAdapter(MainActivity.this, data);
+                                    listData.setAdapter(adapter);
+                                }
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -99,6 +131,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         AppController.getInstance().addToRequestQueue(jor);
 
     }
+
+
     /**
      * @param objData -JSON Object
      * @return ArrayList<SearchResultModel>
@@ -112,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (objData != null) {
                 data = new ArrayList<SearchResultModel>();
                 JSONObject objContinue = null;
+
                 if (objData.has("continue")) {
                     objContinue = objData.getJSONObject("continue");
                 }
@@ -120,14 +155,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     objQuery = objData.getJSONObject("query");
                 }
                 int offset = 0;
-                if (objData.has("query")) {
-                    offset = objContinue.getInt("gpsoffset");
+                if (objContinue!=null) {
+                    if (objContinue.has("query")) {
+
+                        offset = objContinue.getInt("gpsoffset");
+                    }
                 }
                 JSONObject pages = null;
-                if (objQuery.has("pages")) {
-                    pages = objQuery.getJSONObject("pages");
+                if(objQuery!=null) {
+                    if (objQuery.has("pages")) {
+                        pages = objQuery.getJSONObject("pages");
+                    }
                 }
-                if (pages != null && pages != null) {
+                if (pages != null ) {
                     Iterator<String> keys = pages.keys();
                     while (keys.hasNext()) {
                         SearchResultModel model = new SearchResultModel();
@@ -176,8 +216,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.btnSearch:
-                if (edtSearch.getText().toString().trim().length() > 0) {
+         /*   case R.id.btnSearch:
+                *//*if (edtSearch.getText().toString().trim().length() > 0) {
                     pDialog = new ProgressDialog(this);
                     // Showing progress dialog before making http request
                     pDialog.setMessage("Loading...");
@@ -187,8 +227,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }else
                 {
                     Toast.makeText(MainActivity.this,getResources().getString(R.string.empty_warning_message), Toast.LENGTH_SHORT).show();
-                }
-                break;
+                }*//*
+                break;*/
         }
     }
 }
