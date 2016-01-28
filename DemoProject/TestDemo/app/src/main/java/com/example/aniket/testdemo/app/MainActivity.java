@@ -35,10 +35,10 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity  {
 
 
-    private Button btnSearch;
+
     private EditText edtSearch;
     private ProgressDialog pDialog;
     private ListView listData;
@@ -213,22 +213,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return data;
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-         /*   case R.id.btnSearch:
-                *//*if (edtSearch.getText().toString().trim().length() > 0) {
-                    pDialog = new ProgressDialog(this);
-                    // Showing progress dialog before making http request
-                    pDialog.setMessage("Loading...");
-                    pDialog.setCancelable(false);
-                    pDialog.show();
-                    processRequest(edtSearch.getText().toString());
-                }else
-                {
-                    Toast.makeText(MainActivity.this,getResources().getString(R.string.empty_warning_message), Toast.LENGTH_SHORT).show();
-                }*//*
-                break;*/
-        }
-    }
+
 }
